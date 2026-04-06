@@ -90,6 +90,13 @@ class Optimizer:
 	def __init__(self, *modules):
 		self.modules = modules
 
+	def _iter_params_with_paths(optimizer):
+		for idx, layer in enumerate(optimizer._iter_param_layers()):
+			params = layer.parameters()
+			for param_name, param in params.items():
+				if param is not None:
+					yield f'layer{idx}.{param_name}', param
+
 	def _iter_param_layers(self, module=None):
 		if module is None:
 			for root in self.modules:
