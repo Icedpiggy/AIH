@@ -1,6 +1,6 @@
 import module as nn
 from dataprocess import Dataloader
-from Lab1.data1 import SineDataset
+from data1 import SineDataset
 import pickle
 import numpy as np
 from tqdm import tqdm
