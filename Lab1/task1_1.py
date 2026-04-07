@@ -1,6 +1,6 @@
 import module as nn
 from dataprocess import Dataloader
-from task1data import SineDataset
+from Lab1.data1 import SineDataset
 import pickle
 import numpy as np
 from tqdm import tqdm
@@ -67,8 +67,8 @@ def plot_loss_curves(train_losses, val_losses):
 	plt.legend(fontsize=10)
 	plt.grid(True, alpha=0.3)
 	plt.tight_layout()
-	plt.savefig('./data_1/loss_curve.png', dpi=300, bbox_inches='tight')
-	print("Loss curve saved to ./checkpoint_1/loss_curve.png")
+	plt.savefig('./checkpoint_1_1/loss_curve.png', dpi=300, bbox_inches='tight')
+	print("Loss curve saved to ./checkpoint_1_1/loss_curve.png")
 	plt.show()
 
 def main():
@@ -124,9 +124,9 @@ def main():
 		error = abs(y_true[i][0] - y_pred[i][0])
 		print(f"x={x_test[i][0]:.10f}: true={y_true[i][0]:.10f}, pred={y_pred[i][0]:.10f}, error={error:.10f}")
 
-	with open('./checkpoint_1/model.pkl', 'wb') as f:
+	with open('./checkpoint_1_1/model.pkl', 'wb') as f:
 		pickle.dump(model.state_dict(), f)
-	print("Model saved to ./checkpoint_1/model.pkl")
+	print("Model saved to ./checkpoint_1_1/model.pkl")
 
 if __name__ == "__main__":
 	main()
