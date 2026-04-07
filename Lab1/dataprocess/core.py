@@ -9,6 +9,12 @@ class Dataset:
 
 	def __getitem__(self, idx):
 		raise NotImplementedError(f"{self.__class__.__name__}.__getitem__() not implemented")
+	
+	def state_dict(self):
+		raise NotImplementedError(f"{self.__class__.__name__}.state_dict() not implemented")
+	
+	def load_state_dict(self):
+		raise NotImplementedError(f"{self.__class__.__name__}.load_state_dict() not implemented")
 
 
 class Dataloader:
@@ -32,4 +38,6 @@ class Dataloader:
 	def collate_batch(self, batch):
 		x = [item[0] for item in batch]
 		y = [item[1] for item in batch]
-		return np.stack(x), np.array(y)
+		x = np.array(x).reshape(-1, 1) if x[0].ndim == 0 else np.stack(x)
+		y = np.array(y).reshape(-1, 1) if y[0].ndim == 0 else np.stack(y)
+		return x, y
