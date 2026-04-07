@@ -40,7 +40,7 @@ def load_data(data_dir):
 			img_array = np.array(img)
 			if len(img_array.shape) == 3:
 				img_array = img_array[:,:,0]
-			x.append(img_array)
+			x.append(1.0 - img_array)
 			y.append(int(category) - 1)
 
 	return np.array(x), np.array(y)
