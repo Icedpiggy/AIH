@@ -38,8 +38,8 @@ class SineDataset(Dataset):
 
 if __name__ == "__main__":
 	np.random.seed(42)
-	train_size = 4096
-	val_size = 1024
+	train_size = 16384
+	val_size = 4096
 
 	x = np.random.uniform(-np.pi, np.pi, train_size)
 	y = np.sin(x)

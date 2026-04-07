@@ -7,7 +7,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 class SineModel(nn.Module):
-	def __init__(self, hidden_dim=64):
+	def __init__(self, hidden_dim=16):
 		super().__init__()
 		self.layers = [
 			nn.Linear(1, hidden_dim, random_policy='He'),
@@ -89,7 +89,7 @@ def main():
 	criterion = nn.MSELoss()
 	optimizer = nn.Adam(model, lr=0.0005)
 
-	num_epochs = 200
+	num_epochs = 100
 	print_every = 1
 
 	train_losses = []

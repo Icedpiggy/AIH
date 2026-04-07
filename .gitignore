@@ -1,5 +1,7 @@
 temp
 __pycache__
-test_*
 data_*
 .vscode
+checkpoint_*
+__test__
+test
