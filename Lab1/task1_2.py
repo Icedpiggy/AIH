@@ -8,22 +8,30 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 class ImageModel(nn.Module):
-	def __init__(self):
+	def __init__(self, dropout_rate=0.2):
 		super().__init__()
 		self.layers = [
 			nn.Linear(784, 256, random_policy='He'),
+			nn.BatchNorm(256),
 			nn.ReLU(),
-			nn.Linear(256, 128, random_policy='He'),
+			nn.Dropout(dropout_rate),
+
+			nn.Linear(256, 256, random_policy='He'),
+			nn.BatchNorm(256),
 			nn.ReLU(),
-			nn.Linear(128, 64, random_policy='He'),
+			nn.Dropout(dropout_rate),
+
+			nn.Linear(256, 256, random_policy='He'),
+			nn.BatchNorm(256),
 			nn.ReLU(),
-			nn.Linear(64, 12, random_policy='He')
+			nn.Dropout(dropout_rate),
+
+			nn.Linear(256, 12, random_policy='He')
 		]
 
 	def forward(self, x):
-		x = x.reshape(-1, 28 * 28)
 		for layer in self.layers:
-			x = layer.forward(x)
+			x = layer(x)
 		return x
 
 	def backward(self, d):
@@ -38,8 +46,8 @@ def train_epoch(model, dataloader, criterion, optimizer):
 	total = 0
 
 	for batch_x, batch_y in dataloader:
-		pred = model.forward(batch_x)
-		loss = criterion.forward(pred, batch_y)
+		pred = model(batch_x)
+		loss = criterion(pred, batch_y)
 
 		d_loss = criterion.backward()
 		model.backward(d_loss)
@@ -63,9 +71,8 @@ def validate(model, dataloader, criterion):
 	total = 0
 
 	for batch_x, batch_y in dataloader:
-		batch_x = batch_x.reshape(batch_x.shape[0], -1)
-		pred = model.forward(batch_x)
-		loss = criterion.forward(pred, batch_y)
+		pred = model(batch_x)
+		loss = criterion(pred, batch_y)
 		total_loss += loss
 
 		pred_labels = np.argmax(pred, axis=1)
@@ -113,7 +120,7 @@ def main():
 	trainloader = Dataloader(trainset, batch_size=64, shuffle=True)
 	valloader = Dataloader(valset, batch_size=64, shuffle=False)
 
-	model = ImageModel()
+	model = ImageModel(dropout_rate=0.2)
 	criterion = nn.CrossEntropyLoss()
 	optimizer = nn.Adam(model, lr=0.001)
 

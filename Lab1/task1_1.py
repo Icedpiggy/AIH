@@ -20,11 +20,14 @@ class SineModel(nn.Module):
 		]
 
 	def forward(self, x):
+		x = x.reshape(-1, 1)
 		for layer in self.layers:
-			x = layer.forward(x)
+			x = layer(x)
+		x = x.reshape(-1)
 		return x
 
 	def backward(self, d):
+		d = d.reshape(-1, 1)
 		for layer in reversed(self.layers):
 			d = layer.backward(d)
 		return d
@@ -33,8 +36,8 @@ def train_epoch(model, dataloader, criterion, optimizer):
 	model.train()
 	total_loss = 0
 	for batch_x, batch_y in dataloader:
-		pred = model.forward(batch_x)
-		loss = criterion.forward(pred, batch_y)
+		pred = model(batch_x)
+		loss = criterion(pred, batch_y)
 
 		d_loss = criterion.backward()
 		model.backward(d_loss)
@@ -50,8 +53,8 @@ def validate(model, dataloader, criterion):
 	model.eval()
 	total_loss = 0
 	for batch_x, batch_y in dataloader:
-		pred = model.forward(batch_x)
-		loss = criterion.forward(pred, batch_y)
+		pred = model(batch_x)
+		loss = criterion(pred, batch_y)
 		total_loss += loss
 
 	return total_loss / len(dataloader)
@@ -112,17 +115,6 @@ def main():
 	print(f"Final Train Loss: {final_train_loss:.10f}, Final Val Loss: {final_val_loss:.10f}")
 
 	plot_loss_curves(train_losses, val_losses)
-
-	x_test = np.array([[-np.pi], [-np.pi/2], [0], [np.pi/2], [np.pi]])
-	y_true = np.sin(x_test)
-
-	model.eval()
-	y_pred = model.forward(x_test)
-
-	print("\nTest Results:")
-	for i in range(len(x_test)):
-		error = abs(y_true[i][0] - y_pred[i][0])
-		print(f"x={x_test[i][0]:.10f}: true={y_true[i][0]:.10f}, pred={y_pred[i][0]:.10f}, error={error:.10f}")
 
 	with open('./checkpoint_1_1/model.pkl', 'wb') as f:
 		pickle.dump(model.state_dict(), f)

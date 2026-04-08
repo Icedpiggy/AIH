@@ -38,6 +38,4 @@ class Dataloader:
 	def collate_batch(self, batch):
 		x = [item[0] for item in batch]
 		y = [item[1] for item in batch]
-		x = np.array(x).reshape(-1, 1) if x[0].ndim == 0 else np.stack(x)
-		y = np.array(y).reshape(-1, 1) if y[0].ndim == 0 else np.stack(y)
-		return x, y
+		return np.stack(x), np.stack(y)

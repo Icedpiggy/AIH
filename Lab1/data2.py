@@ -14,7 +14,7 @@ class ImgDataset(Dataset):
 		return len(self.x)
 
 	def __getitem__(self, idx):
-		return self.x[idx], self.y[idx]
+		return self.x[idx].reshape(-1), self.y[idx]
 
 	def state_dict(self):
 		return {
