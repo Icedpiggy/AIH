@@ -12,12 +12,17 @@ class Conv2d(Module):
 		self.stride = stride
 		self.padding = padding
 
-		self.w = random_array(in_channels * kernel_size * kernel_size, out_channels, random_policy=random_policy)
+		self.fan_in = in_channels * kernel_size * kernel_size
+		self.fan_out = out_channels
+
+		self.w = random_array(self.fan_in, self.fan_out, random_policy=random_policy)
 		self.b = np.zeros(out_channels)
 
 		self.dw = np.zeros_like(self.w)
 		self.db = np.zeros_like(self.b)
+
 		self.x = None
+		self.x_shape = None
 	
 	def parameters(self):
 		return {'w': self.w, 'b': self.b}
@@ -37,20 +42,51 @@ class Conv2d(Module):
 		windows = windows.transpose(0, 2, 3, 1, 4, 5).reshape(batch_size, out_h, out_w, -1)
 		return np.ascontiguousarray(windows)
 
-	def col2im(self, x):
-		pass
+	def col2im(self, d):
+		batch_size, out_h, out_w, _ = d.shape
+		d = d.reshape(batch_size, out_h, out_w, self.in_channels, self.kernel_size, self.kernel_size).transpose(0, 3, 1, 2, 4, 5)
+
+		n_idx = np.broadcast_to(np.arange(batch_size).reshape(-1, 1, 1, 1, 1, 1), d.shape)
+		c_idx = np.broadcast_to(np.arange(self.in_channels).reshape(1, -1, 1, 1, 1, 1), d.shape)
+		h_idx = np.broadcast_to(np.arange(out_h).reshape(1, 1, -1, 1, 1, 1) * self.stride + np.arange(self.kernel_size).reshape(1, 1, 1, 1, -1, 1), d.shape)
+		w_idx = np.broadcast_to(np.arange(out_w).reshape(1, 1, 1, -1, 1, 1) * self.stride + np.arange(self.kernel_size).reshape(1, 1, 1, 1, 1, -1), d.shape)
+
+		n_flat = np.flatten(n_idx)
+		c_flat = np.flatten(c_idx)
+		h_flat = np.flatten(h_idx)
+		w_flat = np.flatten(w_idx)
+		
+		d_flat = np.flatten(d_flat)
+
+		d = np.zeros(self.x_shape)
+		d[n_flat, c_flat, h_flat, w_flat] += d_flat
+		return d
 
 	def forward(self, x):
 		if self.padding > 0:
 			x = np.pad(x, ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)), mode='constant', constant_values=0)
-		x = (self.im2col(x) @ self.w).transpose(0, 3, 1, 2) + self.b.reshape(1, -1, 1, 1)
-		return x
+		if self.training:
+			self.x_shape = x.shape
+		self.x = self.im2col(x)
+		x = (self.x @ self.w).transpose(0, 3, 1, 2) + self.b.reshape(1, -1, 1, 1)
+		if self.training:
+			self.col_shape = self.x.shape
+		else:
+			self.x = None
+		return np.ascontiguousarray(x)
 	
 	def backward(self, d):
-
-		
+		col_shape = d.shape
+		self.db += d.sum(axis=(0, 2, 3))
+		d = np.ascontiguousarray(d.transpose(0, 2, 3, 1).reshape(-1, self.fan_out))
+		self.dw += self.x.reshape(-1, self.fan_in).T @ d
+		d = d @ self.w.T
+		d = d.reshape(col_shape)
+		d = self.im2col(d)
 		if self.padding > 0:
 			d = d[:, :, self.padding:-self.padding, self.padding:-self.padding]
+		self.x = None
+		self.x_shape = None
 		return d
 
 
@@ -100,6 +136,7 @@ class MaxPool2d(Module):
 		d_out = np.zeros((batch_size, channels, H, W))
 		d_out[n_flat, c_flat, h_flat, w_flat] = d_flat
 
-		self.x_shape = None
+		self.H = None
+		self.W = None
 		self.max_idx = None
 		return d_out
