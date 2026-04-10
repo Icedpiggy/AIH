@@ -1,18 +1,57 @@
 import numpy as np
 from .core import *
+from .init import *
 from numpy.lib.stride_tricks import as_strided
 
 class Conv2d(Module):
-	def __init__(self):
-		pass
+	def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, random_policy=None):
+		super().__init__()
+		self.in_channels = in_channels
+		self.out_channels = out_channels
+		self.kernel_size = kernel_size
+		self.stride = stride
+		self.padding = padding
+
+		self.w = random_array(in_channels * kernel_size * kernel_size, out_channels, random_policy=random_policy)
+		self.b = np.zeros(out_channels)
+
+		self.dw = np.zeros_like(self.w)
+		self.db = np.zeros_like(self.b)
+		self.x = None
+	
+	def parameters(self):
+		return {'w': self.w, 'b': self.b}
+	
+	def gradients(self):
+		return {'w': self.dw, 'b': self.db}
+	
 	def im2col(self, x):
-		pass
+		batch_size, channels, H, W = x.shape
+		out_h = (H - self.kernel_size) // self.stride + 1
+		out_w = (W - self.kernel_size) // self.stride + 1
+		windows = as_strided(
+			x,
+			shape=(batch_size, channels, out_h, out_w, self.kernel_size, self.kernel_size),
+			strides=(x.strides[0], x.strides[1], x.strides[2] * self.stride, x.strides[3] * self.stride, x.strides[2], x.strides[3])
+		)
+		windows = windows.transpose(0, 2, 3, 1, 4, 5).reshape(batch_size, out_h, out_w, -1)
+		return np.ascontiguousarray(windows)
+
 	def col2im(self, x):
 		pass
+
 	def forward(self, x):
-		pass
-	def backward(self, x):
-		pass
+		if self.padding > 0:
+			x = np.pad(x, ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)), mode='constant', constant_values=0)
+		x = (self.im2col(x) @ self.w).transpose(0, 3, 1, 2) + self.b.reshape(1, -1, 1, 1)
+		return x
+	
+	def backward(self, d):
+
+		
+		if self.padding > 0:
+			d = d[:, :, self.padding:-self.padding, self.padding:-self.padding]
+		return d
 
 
 class MaxPool2d(Module):

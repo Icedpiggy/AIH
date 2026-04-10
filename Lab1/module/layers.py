@@ -10,16 +10,11 @@ class Linear(Module):
 		self.w = None
 		self.b = None
 
-		if random_policy == 'Xavier':
-			self.w = xavier_uniform(self.input_dim, self.output_dim)
-		elif random_policy == 'He':
-			self.w = he_normal(self.input_dim, self.output_dim)
-		else:
-			self.w = np.random.randn(self.input_dim, self.output_dim)
+		self.w = random_array(input_dim, output_dim, random_policy=random_policy)
 		self.b = np.zeros(self.output_dim)
 
-		self.dw = np.zeros((self.input_dim, self.output_dim))
-		self.db = np.zeros(self.output_dim)
+		self.dw = np.zeros_like(self.w)
+		self.db = np.zeros_like(self.b)
 		self.x = None
 
 	def parameters(self):
