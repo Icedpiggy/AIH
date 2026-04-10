@@ -23,6 +23,7 @@ class Conv2d(Module):
 
 		self.x = None
 		self.x_shape = None
+		self.col_shape = None
 	
 	def parameters(self):
 		return {'w': self.w, 'b': self.b}
@@ -51,12 +52,12 @@ class Conv2d(Module):
 		h_idx = np.broadcast_to(np.arange(out_h).reshape(1, 1, -1, 1, 1, 1) * self.stride + np.arange(self.kernel_size).reshape(1, 1, 1, 1, -1, 1), d.shape)
 		w_idx = np.broadcast_to(np.arange(out_w).reshape(1, 1, 1, -1, 1, 1) * self.stride + np.arange(self.kernel_size).reshape(1, 1, 1, 1, 1, -1), d.shape)
 
-		n_flat = np.flatten(n_idx)
-		c_flat = np.flatten(c_idx)
-		h_flat = np.flatten(h_idx)
-		w_flat = np.flatten(w_idx)
-		
-		d_flat = np.flatten(d_flat)
+		n_flat = n_idx.flatten()
+		c_flat = c_idx.flatten()
+		h_flat = h_idx.flatten()
+		w_flat = w_idx.flatten()
+
+		d_flat = d.flatten()
 
 		d = np.zeros(self.x_shape)
 		d[n_flat, c_flat, h_flat, w_flat] += d_flat
@@ -76,13 +77,12 @@ class Conv2d(Module):
 		return np.ascontiguousarray(x)
 	
 	def backward(self, d):
-		col_shape = d.shape
 		self.db += d.sum(axis=(0, 2, 3))
 		d = np.ascontiguousarray(d.transpose(0, 2, 3, 1).reshape(-1, self.fan_out))
 		self.dw += self.x.reshape(-1, self.fan_in).T @ d
 		d = d @ self.w.T
-		d = d.reshape(col_shape)
-		d = self.im2col(d)
+		d = d.reshape(self.col_shape)
+		d = self.col2im(d)
 		if self.padding > 0:
 			d = d[:, :, self.padding:-self.padding, self.padding:-self.padding]
 		self.x = None
