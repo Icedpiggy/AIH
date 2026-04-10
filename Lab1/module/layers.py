@@ -52,7 +52,7 @@ class Dropout(Module):
 		self.mask = None
 		return d
 
-class BatchNorm(Module):
+class BatchNorm1d(Module):
 	def __init__(self, num_features, momentum=0.1, eps=1e-5):
 		super().__init__()
 		self.num_features = num_features
@@ -108,6 +108,72 @@ class BatchNorm(Module):
 		d_var = np.sum(d_normed * self.x_centered, axis=0) * (-0.5) / (std ** 3)
 		d_mean = np.sum(d_normed, axis=0) / (-std) + d_var * np.mean(-2 * self.x_centered, axis=0)
 		d = d_normed / std + d_var * 2 * self.x_centered / batch_size + d_mean / batch_size
+
+		self.x_centered = None
+		self.x_normed = None
+		self.batch_mean = None
+		self.batch_var = None
+		return d
+	
+class BatchNorm2d(Module):
+	def __init__(self, num_features, momentum=0.1, eps=1e-5):
+		super().__init__()
+		self.num_features = num_features
+		self.momentum = momentum
+		self.eps = eps
+
+		self.gamma = np.ones(num_features)
+		self.beta = np.zeros(num_features)
+
+		self.running_mean = np.zeros(num_features)
+		self.running_var = np.zeros(num_features)
+
+		self.d_gamma = np.zeros(num_features)
+		self.d_beta = np.zeros(num_features)
+
+		self.x_centered = None
+		self.x_normed = None
+		self.batch_mean = None
+		self.batch_var = None
+
+	def parameters(self):
+		return {'gamma': self.gamma, 'beta': self.beta}
+
+	def gradients(self):
+		return {'gamma': self.d_gamma, 'beta': self.d_beta}
+	
+	def forward(self, x):
+		if self.training:
+			self.batch_mean = x.mean(axis=(0, 2, 3))
+			self.batch_var = x.var(axis=(0, 2, 3))
+
+			self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * self.batch_mean
+			self.running_var = (1 - self.momentum) * self.running_var + self.momentum * self.batch_var
+
+			mean = self.batch_mean
+			var = self.batch_var
+		else:
+			mean = self.running_mean
+			var = self.running_var
+
+		self.x_centered = x - mean.reshape(1, -1, 1, 1)
+		self.x_normed = self.x_centered / np.sqrt(var.reshape(1, -1, 1, 1) + self.eps)
+		return self.gamma.reshape(1, -1, 1, 1) * self.x_normed + self.beta.reshape(1, -1, 1, 1)
+
+	def backward(self, d):
+		batch_size, channels, H, W = d.shape
+		batch_sum = batch_size * H * W
+
+		self.d_gamma = np.sum(d * self.x_normed, axis=(0, 2, 3))
+		self.d_beta = d.sum(axis=(0, 2, 3))
+
+		std = np.sqrt(self.batch_var + self.eps)
+		d_normed = d * self.gamma.reshape(1, -1, 1, 1)
+		d_var = np.sum(d_normed * self.x_centered, axis=(0, 2, 3)) * (-0.5) / (std ** 3)
+		d_mean = np.sum(d_normed, axis=(0, 2, 3)) / (-std) + d_var * np.mean(-2 * self.x_centered, axis=(0, 2, 3))
+		d = (d_normed / std.reshape(1, -1, 1, 1)
+	       + d_var.reshape(1, -1, 1, 1) * 2 * self.x_centered / batch_sum
+		   + d_mean.reshape(1, -1, 1, 1) / batch_sum)
 
 		self.x_centered = None
 		self.x_normed = None

@@ -136,7 +136,7 @@ def load_data(data_dir):
 
 if __name__ == "__main__":
 	np.random.seed(42)
-	train_rate = 0.9
+	train_rate = 0.8
 
 	data_dir = './data_2/raw'
 	x, y = load_data(data_dir)

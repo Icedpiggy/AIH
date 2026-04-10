@@ -1,6 +1,6 @@
 from .core import Module, Optimizer
 from .init import xavier_uniform, he_normal, random_array
-from .layers import Linear, BatchNorm, Dropout
+from .layers import Linear, Dropout, BatchNorm1d, BatchNorm2d
 from .activations import ReLU, Sigmoid
 from .losses import CrossEntropyLoss, MSELoss, MAELoss
 from .optimizers import SGD, SGDM, Adam
@@ -9,7 +9,7 @@ from .conv import Conv2d, MaxPool2d
 __all__ = [
 	'Module', 'Optimizer',
 	'xavier_uniform', 'he_normal', 'random_array',
-	'Linear', 'BatchNorm', 'Dropout',
+	'Linear', 'Dropout', 'BatchNorm1d', 'BatchNorm2d',
 	'ReLU', 'Sigmoid',
 	'CrossEntropyLoss', 'MSELoss', 'MAELoss',
 	'SGD', 'SGDM', 'Adam',

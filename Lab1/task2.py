@@ -7,37 +7,76 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-class ImageModel(nn.Module):
-	def __init__(self, dropout_rate=0.2):
+class CNNModel(nn.Module):
+	def __init__(self, num_classes=12, dropout_rate=0.3):
 		super().__init__()
-		self.layers = [
-			nn.Linear(784, 256, random_policy='He'),
+
+		self.conv1 = [
+			nn.Conv2d(1, 32, kernel_size=3, padding=1, random_policy='He'),
+			nn.BatchNorm2d(32),
+			nn.ReLU(),
+			nn.Conv2d(32, 32, kernel_size=3, padding=1, random_policy='He'),
+			nn.BatchNorm2d(32),
+			nn.ReLU(),
+			nn.MaxPool2d(2, 2),
+			nn.Dropout(dropout_rate)
+		]
+
+		self.conv2 = [
+			nn.Conv2d(32, 64, kernel_size=3, padding=1, random_policy='He'),
+			nn.BatchNorm2d(64),
+			nn.ReLU(),
+			nn.Conv2d(64, 64, kernel_size=3, padding=1, random_policy='He'),
+			nn.BatchNorm2d(64),
+			nn.ReLU(),
+			nn.MaxPool2d(2, 2),
+			nn.Dropout(dropout_rate)
+		]
+
+		self.fc = [
+			nn.Linear(7 * 7 * 64, 256, random_policy='He'),
 			nn.BatchNorm1d(256),
 			nn.ReLU(),
 			nn.Dropout(dropout_rate),
-
-			nn.Linear(256, 256, random_policy='He'),
-			nn.BatchNorm1d(256),
+			nn.Linear(256, 128, random_policy='He'),
+			nn.BatchNorm1d(128),
 			nn.ReLU(),
 			nn.Dropout(dropout_rate),
-
-			nn.Linear(256, 256, random_policy='He'),
-			nn.BatchNorm1d(256),
-			nn.ReLU(),
-			nn.Dropout(dropout_rate),
-
-			nn.Linear(256, 12, random_policy='He')
+			nn.Linear(128, num_classes, random_policy='He')
 		]
 
 	def forward(self, x):
-		for layer in self.layers:
+		batch_size = x.shape[0]
+		x = x.reshape(batch_size, 1, 28, 28)
+
+		for layer in self.conv1:
 			x = layer(x)
+
+		for layer in self.conv2:
+			x = layer(x)
+
+		x = x.reshape(batch_size, -1)
+
+		for layer in self.fc:
+			x = layer(x)
+
 		return x
 
 	def backward(self, d):
-		for layer in reversed(self.layers):
+		d = d.reshape(d.shape[0], -1)
+
+		for layer in reversed(self.fc):
 			d = layer.backward(d)
-		return d
+
+		d = d.reshape(d.shape[0], 64, 7, 7)
+
+		for layer in reversed(self.conv2):
+			d = layer.backward(d)
+
+		for layer in reversed(self.conv1):
+			d = layer.backward(d)
+
+		return d.reshape(d.shape[0], -1)
 
 def train_epoch(model, dataloader, criterion, optimizer):
 	model.train()
@@ -105,8 +144,8 @@ def plot_curves(train_losses, val_losses, train_accs, val_accs):
 	axes[1].grid(True, alpha=0.3)
 
 	plt.tight_layout()
-	plt.savefig('./checkpoint_1_2/training_curves.png', dpi=300, bbox_inches='tight')
-	print("Training curves saved to ./checkpoint_1_2/training_curves.png")
+	plt.savefig('./checkpoint_2/training_curves.png', dpi=300, bbox_inches='tight')
+	print("Training curves saved to ./checkpoint_2/training_curves.png")
 	plt.show()
 
 def main():
@@ -123,7 +162,7 @@ def main():
 	trainloader = Dataloader(trainset, batch_size=64, shuffle=True)
 	valloader = Dataloader(valset, batch_size=64, shuffle=False)
 
-	model = ImageModel(dropout_rate=0.2)
+	model = CNNModel(num_classes=12, dropout_rate=0.3)
 	criterion = nn.CrossEntropyLoss()
 	optimizer = nn.Adam(model, lr=0.001)
 
@@ -156,10 +195,10 @@ def main():
 
 	plot_curves(train_losses, val_losses, train_accs, val_accs)
 
-	os.makedirs('./checkpoint_1_2', exist_ok=True)
-	with open('./checkpoint_1_2/model.pkl', 'wb') as f:
+	os.makedirs('./checkpoint_2', exist_ok=True)
+	with open('./checkpoint_2/model.pkl', 'wb') as f:
 		pickle.dump(model.state_dict(), f)
-	print("Model saved to ./checkpoint_1_2/model.pkl")
+	print("Model saved to ./checkpoint_2/model.pkl")
 
 if __name__ == "__main__":
 	main()
