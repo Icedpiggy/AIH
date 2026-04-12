@@ -1,9 +1,9 @@
 import numpy as np
-import pickle
-from dataprocess import *
+import os
+from utils import Dataset, save_dataset
 
 class SineDataset(Dataset):
-	def __init__(self, x=None, y=None, training=False, eps_x=1e-3, eps_y=1e-3):
+	def __init__(self, x, y, training=False, eps_x=1e-3, eps_y=1e-3):
 		super().__init__()
 		self.x = x
 		self.y = y
@@ -36,21 +36,24 @@ class SineDataset(Dataset):
 		self.eps_x = data['eps_x']
 		self.eps_y = data['eps_y']
 
-if __name__ == "__main__":
+def main():
+	HERE = os.path.dirname(os.path.abspath(__file__))
 	np.random.seed(42)
 	train_size = 16384
 	val_size = 4096
 
+	data_dir = os.path.join(HERE, 'data')
+	os.makedirs(data_dir, exist_ok=True)
+
 	x = np.random.uniform(-np.pi, np.pi, train_size)
 	y = np.sin(x)
-
 	trainset = SineDataset(x, y, training=False, eps_x=1e-3, eps_y=1e-3)
-	with open('./data_1/train.pkl', 'wb') as f:
-		pickle.dump(trainset.state_dict(), f)
+	save_dataset(trainset, data_dir, 'train')
 
 	x = np.random.uniform(-np.pi, np.pi, val_size)
 	y = np.sin(x)
-
 	valset = SineDataset(x, y, training=False)
-	with open('./data_1/val.pkl', 'wb') as f:
-		pickle.dump(valset.state_dict(), f)
+	save_dataset(valset, data_dir, 'val')
+
+if __name__ == "__main__":
+	main()

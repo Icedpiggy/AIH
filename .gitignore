@@ -1,7 +1,10 @@
 temp
 __pycache__
-data_*
+.pytest_cache
 .vscode
-checkpoint_*
 __test__
 test
+data
+data_*
+checkpoint
+checkpoint_*

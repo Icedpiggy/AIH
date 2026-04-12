@@ -1,11 +1,10 @@
 import os
 import numpy as np
-import pickle
 from PIL import Image
-from dataprocess import *
+from utils import Dataset, save_dataset
 
 class ImgDataset(Dataset):
-	def __init__(self, x=None, y=None, training=False):
+	def __init__(self, x, y, training=False):
 		self.x = x
 		self.y = y
 		self.training = training
@@ -134,11 +133,36 @@ def load_data(data_dir):
 
 	return np.array(x), np.array(y)
 
-if __name__ == "__main__":
-	np.random.seed(42)
-	train_rate = 0.8
 
-	data_dir = './data_2/raw'
+def prepare_image_data(src_dir, dst_dir, train_rate=0.8, num_classes=12):
+	train_pkl = os.path.join(dst_dir, 'train.pkl')
+	val_pkl = os.path.join(dst_dir, 'val.pkl')
+
+	if os.path.exists(train_pkl) and os.path.exists(val_pkl):
+		return
+
+	x, y = load_data(src_dir)
+
+	train_indices = []
+	val_indices = []
+
+	for i in range(num_classes):
+		class_indices = np.where(y == i)[0]
+		np.random.shuffle(class_indices)
+		split_idx = int(len(class_indices) * train_rate)
+
+		train_indices.extend(class_indices[:split_idx])
+		val_indices.extend(class_indices[split_idx:])
+
+	save_dataset(ImgDataset(x[train_indices], y[train_indices], training=True), dst_dir, 'train')
+	save_dataset(ImgDataset(x[val_indices], y[val_indices], training=False), dst_dir, 'val')
+
+
+if __name__ == "__main__":
+	HERE = os.path.dirname(os.path.abspath(__file__))
+	np.random.seed(42)
+
+	data_dir = os.path.join(HERE, '..', 'data_2')
 	x, y = load_data(data_dir)
 
 	train_indices = []
@@ -147,7 +171,7 @@ if __name__ == "__main__":
 	for i in range(12):
 		class_indices = np.where(y == i)[0]
 		np.random.shuffle(class_indices)
-		split_idx = int(len(class_indices) * train_rate)
+		split_idx = int(len(class_indices) * 0.8)
 
 		train_indices.extend(class_indices[:split_idx])
 		val_indices.extend(class_indices[split_idx:])
@@ -157,22 +181,17 @@ if __name__ == "__main__":
 	val_x = x[val_indices]
 	val_y = y[val_indices]
 
-	os.makedirs('./data_2', exist_ok=True)
+	data_dir = os.path.join(HERE, 'data')
+	os.makedirs(data_dir, exist_ok=True)
+	save_dataset(ImgDataset(train_x, train_y, training=True), data_dir, 'train')
+	save_dataset(ImgDataset(val_x, val_y, training=False), data_dir, 'val')
 
-	with open('./data_2/train.pkl', 'wb') as f:
-		pickle.dump({'x': train_x, 'y': train_y, 'training': True}, f)
-
-	with open('./data_2/val.pkl', 'wb') as f:
-		pickle.dump({'x': val_x, 'y': val_y, 'training': False}, f)
-
-	print(f'Train set: {len(train_x)} samples, shape: {train_x.shape}')
-	print(f'Val set: {len(val_x)} samples, shape: {val_x.shape}')
+	print(f'Train set: {len(train_x)} samples')
+	print(f'Val set: {len(val_x)} samples')
 	print()
 	print('Class distribution:')
 	for i in range(12):
 		train_count = np.sum(train_y == i)
 		val_count = np.sum(val_y == i)
 		total_count = train_count + val_count
-		train_ratio = train_count / total_count * 100 if total_count > 0 else 0
-		val_ratio = val_count / total_count * 100 if total_count > 0 else 0
-		print(f'Class {i}: train={train_count} ({train_ratio:.2f}%), val={val_count} ({val_ratio:.2f}%)')
+		print(f'Class {i}: train={train_count}, val={val_count}')
