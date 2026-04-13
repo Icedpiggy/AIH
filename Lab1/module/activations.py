@@ -27,3 +27,16 @@ class Sigmoid(Module):
 
 	def backward(self, d):
 		return d * (self.z * (1 - self.z))
+
+
+class Tanh(Module):
+	def __init__(self):
+		super().__init__()
+		self.z = None
+
+	def forward(self, x):
+		self.z = np.tanh(x)
+		return self.z
+
+	def backward(self, d):
+		return d * (1 - self.z ** 2)

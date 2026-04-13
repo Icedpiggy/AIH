@@ -1,17 +1,14 @@
 import module as nn
 
 class SineModel(nn.Module):
-	def __init__(self, hidden_dim=16):
+	def __init__(self, hidden_dims=(16, 16, 16), activation=nn.ReLU, init='He'):
 		super().__init__()
-		self.layers = [
-			nn.Linear(1, hidden_dim, random_policy='He'),
-			nn.ReLU(),
-			nn.Linear(hidden_dim, hidden_dim, random_policy='He'),
-			nn.ReLU(),
-			nn.Linear(hidden_dim, hidden_dim, random_policy='He'),
-			nn.ReLU(),
-			nn.Linear(hidden_dim, 1, random_policy='He')
-		]
+		self.layers = []
+		dims = [1] + list(hidden_dims) + [1]
+		for i in range(len(dims) - 1):
+			self.layers.append(nn.Linear(dims[i], dims[i + 1], random_policy=init))
+			if i < len(dims) - 2:
+				self.layers.append(activation())
 
 	def forward(self, x):
 		x = x.reshape(-1, 1)

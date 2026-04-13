@@ -12,7 +12,7 @@ def main():
 	testset = load_dataset(SineDataset, os.path.join(HERE, 'data'), 'test')
 	testloader = Dataloader(testset, batch_size=64, shuffle=False)
 
-	model = SineModel(hidden_dim=16)
+	model = SineModel(hidden_dims=(16, 16, 16))
 	with open(os.path.join(HERE, 'checkpoint', 'model.pkl'), 'rb') as f:
 		model.load_state_dict(pickle.load(f))
 
