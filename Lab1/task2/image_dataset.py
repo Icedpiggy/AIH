@@ -33,17 +33,11 @@ class ImgDataset(Dataset):
 		if numpy.random.rand() < 0.5:
 			img = self.random_shift(img)
 
-		if numpy.random.rand() < 0.35:
-			img = self.gaussian_filter(img)
-
-		if numpy.random.rand() < 0.35:
-			img = self.adjust_brightness(img)
-
-		if numpy.random.rand() < 0.35:
-			img = self.adjust_contrast(img)
-
 		if numpy.random.rand() < 0.3:
 			img = self.random_cutout(img)
+
+		if numpy.random.rand() < 0.4:
+			img = self.gaussian_filter(img)
 
 		if numpy.random.rand() < 0.3:
 			img = self.add_gaussian_noise(img)
@@ -77,15 +71,6 @@ class ImgDataset(Dataset):
 			padded = numpy.zeros((h, w))
 			padded[pad_h:pad_h+zoomed.shape[0], pad_w:pad_w+zoomed.shape[1]] = zoomed
 			return padded
-
-	def adjust_brightness(self, img):
-		delta = numpy.random.uniform(-0.1, 0.1)
-		return numpy.clip(img + delta, 0, 1)
-
-	def adjust_contrast(self, img):
-		factor = numpy.random.uniform(0.8, 1.2)
-		mean = img.mean()
-		return numpy.clip((img - mean) * factor + mean, 0, 1)
 
 	def add_gaussian_noise(self, img):
 		noise = numpy.random.normal(0, 0.02, img.shape)

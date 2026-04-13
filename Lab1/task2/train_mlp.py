@@ -19,7 +19,7 @@ def main():
 	trainloader = Dataloader(trainset, batch_size=64, shuffle=True)
 	valloader = Dataloader(valset, batch_size=64, shuffle=False)
 
-	model = ImageModel(dropout_rate=0.2)
+	model = ImageModel(hidden_dims=(256, 256, 256), dropout_rate=0.2)
 	criterion = nn.CrossEntropyLoss()
 	optimizer = nn.Adam(model, lr=0.001)
 
