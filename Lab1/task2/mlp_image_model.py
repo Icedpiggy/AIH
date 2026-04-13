@@ -9,17 +9,17 @@ class ImageModel(nn.Module):
 			nn.ReLU(),
 			nn.Dropout(dropout_rate),
 
-			nn.Linear(256, 128, random_policy='He'),
-			nn.BatchNorm1d(128),
+			nn.Linear(256, 256, random_policy='He'),
+			nn.BatchNorm1d(256),
 			nn.ReLU(),
 			nn.Dropout(dropout_rate),
 
-			nn.Linear(128, 64, random_policy='He'),
-			nn.BatchNorm1d(64),
+			nn.Linear(256, 256, random_policy='He'),
+			nn.BatchNorm1d(256),
 			nn.ReLU(),
 			nn.Dropout(dropout_rate),
 
-			nn.Linear(64, 12, random_policy='He')
+			nn.Linear(256, 12, random_policy='He')
 		]
 
 	def forward(self, x):

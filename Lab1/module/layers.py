@@ -76,6 +76,9 @@ class BatchNorm1d(Module):
 	def parameters(self):
 		return {'gamma': self.gamma, 'beta': self.beta}
 
+	def buffers(self):
+		return {'running_mean': self.running_mean, 'running_var': self.running_var}
+
 	def gradients(self):
 		return {'gamma': self.d_gamma, 'beta': self.d_beta}
 
@@ -139,9 +142,12 @@ class BatchNorm2d(Module):
 	def parameters(self):
 		return {'gamma': self.gamma, 'beta': self.beta}
 
+	def buffers(self):
+		return {'running_mean': self.running_mean, 'running_var': self.running_var}
+
 	def gradients(self):
 		return {'gamma': self.d_gamma, 'beta': self.d_beta}
-	
+
 	def forward(self, x):
 		if self.training:
 			self.batch_mean = x.mean(axis=(0, 2, 3))

@@ -7,6 +7,9 @@ class Module:
 	def parameters(self):
 		return {}
 
+	def buffers(self):
+		return {}
+
 	def gradients(self):
 		return {}
 
@@ -66,6 +69,12 @@ class Module:
 				state_key = prefix + key
 				state[state_key] = value.copy() if isinstance(value, np.ndarray) else value
 
+		buffers = self.buffers()
+		for key, value in buffers.items():
+			if value is not None:
+				state_key = prefix + key
+				state[state_key] = value.copy() if isinstance(value, np.ndarray) else value
+
 		for name, child in self.named_children():
 			child_prefix = prefix + name + '.'
 			state.update(child.state_dict(child_prefix))
@@ -75,6 +84,15 @@ class Module:
 	def load_state_dict(self, state_dict, prefix=''):
 		params = self.parameters()
 		for key, value in params.items():
+			state_key = prefix + key
+			if state_key in state_dict and value is not None:
+				if isinstance(value, np.ndarray):
+					value[:] = state_dict[state_key]
+				else:
+					setattr(self, key, state_dict[state_key])
+
+		buffers = self.buffers()
+		for key, value in buffers.items():
 			state_key = prefix + key
 			if state_key in state_dict and value is not None:
 				if isinstance(value, np.ndarray):

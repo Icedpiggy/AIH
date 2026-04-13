@@ -6,7 +6,7 @@ def train_epoch(model, dataloader, criterion, optimizer, task_type='classificati
 	total_loss = 0
 
 	if task_type == 'regression':
-		pbar = tqdm(dataloader)
+		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
@@ -27,7 +27,7 @@ def train_epoch(model, dataloader, criterion, optimizer, task_type='classificati
 		correct = 0
 		total = 0
 
-		pbar = tqdm(dataloader)
+		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
@@ -55,7 +55,7 @@ def validate(model, dataloader, criterion, task_type='classification'):
 	total_loss = 0
 
 	if task_type == 'regression':
-		pbar = tqdm(dataloader)
+		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
@@ -68,7 +68,7 @@ def validate(model, dataloader, criterion, task_type='classification'):
 		correct = 0
 		total = 0
 
-		pbar = tqdm(dataloader)
+		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
