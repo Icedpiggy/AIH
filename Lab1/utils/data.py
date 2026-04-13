@@ -1,6 +1,6 @@
 import os
 import pickle
-import numpy as np
+from utils.backend import np, numpy
 
 
 class Dataset:
@@ -31,7 +31,7 @@ class Dataloader:
 		return (len(self.dataset) + self.batch_size - 1) // self.batch_size
 
 	def __iter__(self):
-		indices = np.random.permutation(len(self.dataset)) if self.shuffle else np.arange(len(self.dataset))
+		indices = numpy.random.permutation(len(self.dataset)) if self.shuffle else numpy.arange(len(self.dataset))
 
 		for i in range(0, len(indices), self.batch_size):
 			batch_indices = indices[i: i+self.batch_size]
@@ -41,7 +41,7 @@ class Dataloader:
 	def collate_batch(self, batch):
 		x = [item[0] for item in batch]
 		y = [item[1] for item in batch]
-		return np.stack(x), np.stack(y)
+		return np.array(numpy.stack(x)), np.array(numpy.stack(y))
 
 
 def load_dataset(dataset_cls, data_dir='./data', split='train'):

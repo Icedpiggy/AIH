@@ -1,4 +1,4 @@
-import numpy as np
+from utils.backend import np
 from .core import *
 from .init import *
 

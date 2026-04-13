@@ -1,5 +1,5 @@
 import os
-import numpy as np
+from utils.backend import numpy
 from PIL import Image
 from utils import Dataset, save_dataset
 
@@ -24,46 +24,46 @@ class ImgDataset(Dataset):
 	def apply_augmentation(self, img):
 		img = img.reshape(28, 28)
 
-		if np.random.rand() < 0.5:
+		if numpy.random.rand() < 0.5:
 			img = self.random_rotation(img)
 
-		if np.random.rand() < 0.5:
+		if numpy.random.rand() < 0.5:
 			img = self.random_scale(img)
 
-		if np.random.rand() < 0.5:
+		if numpy.random.rand() < 0.5:
 			img = self.random_shift(img)
 
-		if np.random.rand() < 0.35:
+		if numpy.random.rand() < 0.35:
 			img = self.gaussian_filter(img)
 
-		if np.random.rand() < 0.35:
+		if numpy.random.rand() < 0.35:
 			img = self.adjust_brightness(img)
 
-		if np.random.rand() < 0.35:
+		if numpy.random.rand() < 0.35:
 			img = self.adjust_contrast(img)
 
-		if np.random.rand() < 0.3:
+		if numpy.random.rand() < 0.3:
 			img = self.random_cutout(img)
 
-		if np.random.rand() < 0.3:
+		if numpy.random.rand() < 0.3:
 			img = self.add_gaussian_noise(img)
 
 		return img
 
 	def random_rotation(self, img):
 		from scipy.ndimage import rotate
-		angle = np.random.uniform(-10, 10)
+		angle = numpy.random.uniform(-10, 10)
 		return rotate(img, angle, reshape=False, order=1, mode='constant', cval=0.0, prefilter=False)
 
 	def random_shift(self, img):
 		from scipy.ndimage import shift
-		shift_y = np.random.uniform(-2, 2)
-		shift_x = np.random.uniform(-2, 2)
+		shift_y = numpy.random.uniform(-2, 2)
+		shift_x = numpy.random.uniform(-2, 2)
 		return shift(img, [shift_y, shift_x], order=1, mode='constant', cval=0.0, prefilter=False)
 
 	def random_scale(self, img):
 		from scipy.ndimage import zoom
-		scale = np.random.uniform(0.9, 1.1)
+		scale = numpy.random.uniform(0.9, 1.1)
 		h, w = img.shape
 		zoomed = zoom(img, scale, order=1, prefilter=False)
 
@@ -74,35 +74,35 @@ class ImgDataset(Dataset):
 		else:
 			pad_h = (h - zoomed.shape[0]) // 2
 			pad_w = (w - zoomed.shape[1]) // 2
-			padded = np.zeros((h, w))
+			padded = numpy.zeros((h, w))
 			padded[pad_h:pad_h+zoomed.shape[0], pad_w:pad_w+zoomed.shape[1]] = zoomed
 			return padded
 
 	def adjust_brightness(self, img):
-		delta = np.random.uniform(-0.1, 0.1)
-		return np.clip(img + delta, 0, 1)
+		delta = numpy.random.uniform(-0.1, 0.1)
+		return numpy.clip(img + delta, 0, 1)
 
 	def adjust_contrast(self, img):
-		factor = np.random.uniform(0.8, 1.2)
+		factor = numpy.random.uniform(0.8, 1.2)
 		mean = img.mean()
-		return np.clip((img - mean) * factor + mean, 0, 1)
+		return numpy.clip((img - mean) * factor + mean, 0, 1)
 
 	def add_gaussian_noise(self, img):
-		noise = np.random.normal(0, 0.02, img.shape)
-		return np.clip(img + noise, 0, 1)
+		noise = numpy.random.normal(0, 0.02, img.shape)
+		return numpy.clip(img + noise, 0, 1)
 
 	def random_cutout(self, img):
 		h, w = img.shape
 		size = max(1, int(h * 0.1))
-		y = np.random.randint(0, h - size)
-		x = np.random.randint(0, w - size)
+		y = numpy.random.randint(0, h - size)
+		x = numpy.random.randint(0, w - size)
 		img = img.copy()
 		img[y:y+size, x:x+size] = 0
 		return img
 
 	def gaussian_filter(self, img):
 		from scipy.ndimage import gaussian_filter
-		sigma = np.random.uniform(0.3, 1.0)
+		sigma = numpy.random.uniform(0.3, 1.0)
 		return gaussian_filter(img, sigma, mode='constant', cval=0.0)
 
 	def state_dict(self):
@@ -125,13 +125,13 @@ def load_data(data_dir):
 		for filename in files:
 			img_path = os.path.join(category_path, filename)
 			img = Image.open(img_path)
-			img_array = np.array(img)
+			img_array = numpy.array(img)
 			if len(img_array.shape) == 3:
 				img_array = img_array[:,:,0]
 			x.append(1.0 - img_array)
 			y.append(int(category) - 1)
 
-	return np.array(x), np.array(y)
+	return numpy.array(x), numpy.array(y)
 
 
 def prepare_image_data(src_dir, dst_dir, train_rate=0.8, num_classes=12):
@@ -147,8 +147,8 @@ def prepare_image_data(src_dir, dst_dir, train_rate=0.8, num_classes=12):
 	val_indices = []
 
 	for i in range(num_classes):
-		class_indices = np.where(y == i)[0]
-		np.random.shuffle(class_indices)
+		class_indices = numpy.where(y == i)[0]
+		numpy.random.shuffle(class_indices)
 		split_idx = int(len(class_indices) * train_rate)
 
 		train_indices.extend(class_indices[:split_idx])
@@ -160,7 +160,7 @@ def prepare_image_data(src_dir, dst_dir, train_rate=0.8, num_classes=12):
 
 if __name__ == "__main__":
 	HERE = os.path.dirname(os.path.abspath(__file__))
-	np.random.seed(42)
+	numpy.random.seed(42)
 
 	data_dir = os.path.join(HERE, '..', 'data_2')
 	x, y = load_data(data_dir)
@@ -169,8 +169,8 @@ if __name__ == "__main__":
 	val_indices = []
 
 	for i in range(12):
-		class_indices = np.where(y == i)[0]
-		np.random.shuffle(class_indices)
+		class_indices = numpy.where(y == i)[0]
+		numpy.random.shuffle(class_indices)
 		split_idx = int(len(class_indices) * 0.8)
 
 		train_indices.extend(class_indices[:split_idx])
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 	print()
 	print('Class distribution:')
 	for i in range(12):
-		train_count = np.sum(train_y == i)
-		val_count = np.sum(val_y == i)
+		train_count = numpy.sum(train_y == i)
+		val_count = numpy.sum(val_y == i)
 		total_count = train_count + val_count
 		print(f'Class {i}: train={train_count}, val={val_count}')

@@ -1,4 +1,4 @@
-import numpy as np
+from utils.backend import numpy
 import os
 from utils import Dataset, save_dataset
 
@@ -16,8 +16,8 @@ class SineDataset(Dataset):
 
 	def __getitem__(self, idx):
 		if self.training:
-			x_noisy = self.x[idx] + np.random.normal(0, self.eps_x)
-			y_noisy = self.y[idx] + np.random.normal(0, self.eps_y)
+			x_noisy = self.x[idx] + numpy.random.normal(0, self.eps_x)
+			y_noisy = self.y[idx] + numpy.random.normal(0, self.eps_y)
 			return x_noisy, y_noisy
 		else:
 			return self.x[idx], self.y[idx]
@@ -38,20 +38,20 @@ class SineDataset(Dataset):
 
 def main():
 	HERE = os.path.dirname(os.path.abspath(__file__))
-	np.random.seed(42)
+	numpy.random.seed(42)
 	train_size = 16384
 	val_size = 4096
 
 	data_dir = os.path.join(HERE, 'data')
 	os.makedirs(data_dir, exist_ok=True)
 
-	x = np.random.uniform(-np.pi, np.pi, train_size)
-	y = np.sin(x)
+	x = numpy.random.uniform(-numpy.pi, numpy.pi, train_size)
+	y = numpy.sin(x)
 	trainset = SineDataset(x, y, training=False, eps_x=1e-3, eps_y=1e-3)
 	save_dataset(trainset, data_dir, 'train')
 
-	x = np.random.uniform(-np.pi, np.pi, val_size)
-	y = np.sin(x)
+	x = numpy.random.uniform(-numpy.pi, numpy.pi, val_size)
+	y = numpy.sin(x)
 	valset = SineDataset(x, y, training=False)
 	save_dataset(valset, data_dir, 'val')
 

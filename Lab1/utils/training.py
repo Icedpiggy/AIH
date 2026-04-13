@@ -1,4 +1,4 @@
-import numpy as np
+from utils.backend import np
 from tqdm import tqdm
 
 def train_epoch(model, dataloader, criterion, optimizer, task_type='classification'):
@@ -6,7 +6,7 @@ def train_epoch(model, dataloader, criterion, optimizer, task_type='classificati
 	total_loss = 0
 
 	if task_type == 'regression':
-		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
+		pbar = tqdm(dataloader, leave=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
@@ -21,13 +21,13 @@ def train_epoch(model, dataloader, criterion, optimizer, task_type='classificati
 
 			pbar.set_postfix({'loss': f'{loss:.8f}'})
 
-		return total_loss / len(dataloader)
+		return float(total_loss / len(dataloader))
 
 	else:
 		correct = 0
 		total = 0
 
-		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
+		pbar = tqdm(dataloader, leave=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
@@ -46,8 +46,8 @@ def train_epoch(model, dataloader, criterion, optimizer, task_type='classificati
 
 			pbar.set_postfix({'loss': f'{loss:.8f}', 'acc': f'{np.sum(pred_labels == batch_y) / len(batch_y):.8f}'})
 
-		accuracy = correct / total if total > 0 else 0
-		return total_loss / len(dataloader), accuracy
+		accuracy = float(correct / total) if total > 0 else 0
+		return float(total_loss / len(dataloader)), accuracy
 
 
 def validate(model, dataloader, criterion, task_type='classification'):
@@ -55,20 +55,20 @@ def validate(model, dataloader, criterion, task_type='classification'):
 	total_loss = 0
 
 	if task_type == 'regression':
-		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
+		pbar = tqdm(dataloader, leave=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
 			total_loss += loss
 			pbar.set_postfix({'loss': f'{loss:.8f}'})
 
-		return total_loss / len(dataloader)
+		return float(total_loss / len(dataloader))
 
 	else:
 		correct = 0
 		total = 0
 
-		pbar = tqdm(dataloader, leave=True, ncols=120, disable=False)
+		pbar = tqdm(dataloader, leave=False)
 		for batch_x, batch_y in pbar:
 			pred = model(batch_x)
 			loss = criterion(pred, batch_y)
@@ -80,5 +80,5 @@ def validate(model, dataloader, criterion, task_type='classification'):
 
 			pbar.set_postfix({'loss': f'{loss:.8f}', 'acc': f'{np.sum(pred_labels == batch_y) / len(batch_y):.8f}'})
 
-		accuracy = correct / total if total > 0 else 0
-		return total_loss / len(dataloader), accuracy
+		accuracy = float(correct / total) if total > 0 else 0
+		return float(total_loss / len(dataloader)), accuracy

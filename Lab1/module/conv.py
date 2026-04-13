@@ -1,7 +1,6 @@
-import numpy as np
+from utils.backend import np, as_strided
 from .core import *
 from .init import *
-from numpy.lib.stride_tricks import as_strided
 
 class Conv2d(Module):
 	def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, random_policy=None):

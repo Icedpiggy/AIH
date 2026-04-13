@@ -4,14 +4,14 @@ from mlp_image_model import ImageModel
 from image_dataset import ImgDataset, prepare_image_data
 import module as nn
 from utils import Dataloader
-import numpy as np
+from utils.backend import numpy
 from tqdm import tqdm
 import pickle
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 def main():
-	np.random.seed(42)
+	numpy.random.seed(42)
 	prepare_image_data(os.path.join(HERE, '..', 'data_2'), os.path.join(HERE, 'data'))
 
 	trainset = load_dataset(ImgDataset, os.path.join(HERE, 'data'), 'train')

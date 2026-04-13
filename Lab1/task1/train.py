@@ -4,14 +4,14 @@ from sine_model import SineModel
 from sine_dataset import SineDataset
 import module as nn
 from utils import Dataloader
-import numpy as np
+from utils.backend import numpy
 from tqdm import tqdm
 import pickle
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 def main():
-	np.random.seed(42)
+	numpy.random.seed(42)
 
 	trainset = load_dataset(SineDataset, os.path.join(HERE, 'data'), 'train')
 	valset = load_dataset(SineDataset, os.path.join(HERE, 'data'), 'val')

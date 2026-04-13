@@ -1,4 +1,4 @@
-import numpy as np
+from utils.backend import np
 from .core import *
 
 def xavier_uniform(input_dim, output_dim, gain=1.0):

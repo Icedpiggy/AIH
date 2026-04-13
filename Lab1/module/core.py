@@ -1,4 +1,4 @@
-import numpy as np
+from utils.backend import np
 
 class Module:
 	def __init__(self):
@@ -87,7 +87,7 @@ class Module:
 			state_key = prefix + key
 			if state_key in state_dict and value is not None:
 				if isinstance(value, np.ndarray):
-					value[:] = state_dict[state_key]
+					value[:] = np.array(state_dict[state_key])
 				else:
 					setattr(self, key, state_dict[state_key])
 
@@ -96,7 +96,7 @@ class Module:
 			state_key = prefix + key
 			if state_key in state_dict and value is not None:
 				if isinstance(value, np.ndarray):
-					value[:] = state_dict[state_key]
+					value[:] = np.array(state_dict[state_key])
 				else:
 					setattr(self, key, state_dict[state_key])
 
