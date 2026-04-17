@@ -18,7 +18,7 @@ def main():
 	trainloader = Dataloader(trainset, batch_size=64, shuffle=True)
 	valloader = Dataloader(valset, batch_size=64, shuffle=False)
 
-	model = SineModel(hidden_dims=(16, 16, 16))
+	model = SineModel(hidden_dims=(16, 16, 16), activation=nn.Tanh, random_policy='Xavier')
 	criterion = nn.MSELoss()
 	optimizer = nn.Adam(model, lr=0.0005)
 

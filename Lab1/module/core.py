@@ -1,8 +1,51 @@
+import functools
+import importlib
+import inspect
 from utils.backend import np
 
-class Module:
+class ModuleMeta(type):
+	def __new__(mcs, name, bases, namespace):
+		cls = super().__new__(mcs, name, bases, namespace)
+		init_func = namespace.get('__init__')
+		if init_func is not None:
+			sig = inspect.signature(init_func)
+			params = [p for p in sig.parameters.values() if p.name != 'self']
+			if params:
+				@functools.wraps(init_func)
+				def wrapped_init(self, *args, **kwargs):
+					bound = sig.bind(self, *args, **kwargs)
+					bound.apply_defaults()
+					self.config = {}
+					for k, v in bound.arguments.items():
+						if k == 'self':
+							continue
+						if isinstance(v, type):
+							self.config[k] = ('__type__', v.__module__, v.__name__)
+						else:
+							self.config[k] = v
+					init_func(self, *args, **kwargs)
+				cls.__init__ = wrapped_init
+		return cls
+
+class Module(metaclass=ModuleMeta):
 	def __init__(self):
 		self.training = True
+		if not hasattr(self, 'config'):
+			self.config = {}
+
+	@classmethod
+	def from_state_dict(cls, state_dict):
+		cfg = state_dict['config']
+		kwargs = {}
+		for k, v in cfg.items():
+			if isinstance(v, tuple) and len(v) == 3 and v[0] == '__type__':
+				mod = importlib.import_module(v[1])
+				kwargs[k] = getattr(mod, v[2])
+			else:
+				kwargs[k] = v
+		model = cls(**kwargs)
+		model.load_state_dict(state_dict)
+		return model
 
 	def parameters(self):
 		return {}
@@ -61,27 +104,39 @@ class Module:
 	def __call__(self, *args, **kwargs):
 		return self.forward(*args, **kwargs)
 
+	def _to_native(self, value):
+		if hasattr(value, 'get'):
+			return value.get()
+		if isinstance(value, np.ndarray):
+			return value.copy()
+		return value
+
 	def state_dict(self, prefix=''):
 		state = {}
 		params = self.parameters()
 		for key, value in params.items():
 			if value is not None:
-				state_key = prefix + key
-				state[state_key] = value.copy() if isinstance(value, np.ndarray) else value
+				state[prefix + key] = self._to_native(value)
 
 		buffers = self.buffers()
 		for key, value in buffers.items():
 			if value is not None:
-				state_key = prefix + key
-				state[state_key] = value.copy() if isinstance(value, np.ndarray) else value
+				state[prefix + key] = self._to_native(value)
 
 		for name, child in self.named_children():
 			child_prefix = prefix + name + '.'
 			state.update(child.state_dict(child_prefix))
 
+		if self.config:
+			state[prefix + 'config'] = self.config
+
 		return state
 
 	def load_state_dict(self, state_dict, prefix=''):
+		config_key = prefix + 'config'
+		if config_key in state_dict:
+			self.config = state_dict[config_key]
+
 		params = self.parameters()
 		for key, value in params.items():
 			state_key = prefix + key

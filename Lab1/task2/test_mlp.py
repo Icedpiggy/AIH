@@ -13,10 +13,8 @@ def main():
 	testset = load_dataset(ImgDataset, os.path.join(HERE, 'data'), 'test')
 	testloader = Dataloader(testset, batch_size=64, shuffle=False)
 
-	model = ImageModel(dropout_rate=0.2)
 	with open(os.path.join(HERE, 'checkpoint_mlp', 'model.pkl'), 'rb') as f:
-		model.load_state_dict(pickle.load(f))
-		print('load')
+		model = ImageModel.from_state_dict(pickle.load(f))
 
 	criterion = nn.CrossEntropyLoss()
 

@@ -13,10 +13,8 @@ def main():
 	testset = load_dataset(ImgDataset, os.path.join(HERE, 'data'), 'test')
 	testloader = Dataloader(testset, batch_size=64, shuffle=False)
 
-	model = CNNModel(num_classes=12, dropout_rate=0.3)
 	with open(os.path.join(HERE, 'checkpoint_cnn', 'model.pkl'), 'rb') as f:
-		model.load_state_dict(pickle.load(f))
-		print('load')
+		model = CNNModel.from_state_dict(pickle.load(f))
 
 	criterion = nn.CrossEntropyLoss()
 
