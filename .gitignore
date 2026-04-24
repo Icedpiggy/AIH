@@ -15,3 +15,5 @@ checkpoint_*
 
 report
 mission.pdf
+
+.gitignore
