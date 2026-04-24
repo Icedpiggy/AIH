@@ -41,19 +41,22 @@ def main():
 	numpy.random.seed(42)
 	train_size = 16384
 	val_size = 4096
+	test_size = 4096
 
 	data_dir = os.path.join(HERE, 'data')
 	os.makedirs(data_dir, exist_ok=True)
 
 	x = numpy.random.uniform(-numpy.pi, numpy.pi, train_size)
 	y = numpy.sin(x)
-	trainset = SineDataset(x, y, training=False, eps_x=1e-3, eps_y=1e-3)
-	save_dataset(trainset, data_dir, 'train')
+	save_dataset(SineDataset(x, y, training=False, eps_x=1e-3, eps_y=1e-3), data_dir, 'train')
 
 	x = numpy.random.uniform(-numpy.pi, numpy.pi, val_size)
 	y = numpy.sin(x)
-	valset = SineDataset(x, y, training=False)
-	save_dataset(valset, data_dir, 'val')
+	save_dataset(SineDataset(x, y, training=False), data_dir, 'val')
+
+	x = numpy.random.uniform(-numpy.pi, numpy.pi, val_size)
+	y = numpy.sin(x)
+	save_dataset(SineDataset(x, y, training=False), data_dir, 'test')
 
 if __name__ == "__main__":
 	main()

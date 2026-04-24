@@ -156,7 +156,7 @@ if __name__ == "__main__":
 	for i in range(12):
 		class_indices = numpy.where(y == i)[0]
 		numpy.random.shuffle(class_indices)
-		split_idx = int(len(class_indices) * 0.8)
+		split_idx = int(len(class_indices) * 0.9)
 
 		train_indices.extend(class_indices[:split_idx])
 		val_indices.extend(class_indices[split_idx:])
@@ -166,17 +166,22 @@ if __name__ == "__main__":
 	val_x = x[val_indices]
 	val_y = y[val_indices]
 
+	data_dir = os.path.join(HERE, '..', 'data_2_test')
+	test_x, test_y = load_data(data_dir)
+
 	data_dir = os.path.join(HERE, 'data')
 	os.makedirs(data_dir, exist_ok=True)
 	save_dataset(ImgDataset(train_x, train_y, training=True), data_dir, 'train')
 	save_dataset(ImgDataset(val_x, val_y, training=False), data_dir, 'val')
+	save_dataset(ImgDataset(test_x, test_y, training=False), data_dir, 'test')
 
 	print(f'Train set: {len(train_x)} samples')
 	print(f'Val set: {len(val_x)} samples')
+	print(f'Test set: {len(test_x)} samples')
 	print()
 	print('Class distribution:')
 	for i in range(12):
 		train_count = numpy.sum(train_y == i)
 		val_count = numpy.sum(val_y == i)
-		total_count = train_count + val_count
-		print(f'Class {i}: train={train_count}, val={val_count}')
+		test_count = numpy.sum(test_y == i)
+		print(f'Class {i}: train={train_count}, val={val_count}, test={test_count}')
