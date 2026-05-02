@@ -7,13 +7,4 @@ __pycache__
 test
 __test__
 
-data
-data_*
-
-checkpoint
-checkpoint_*
-
-report
 mission.pdf
-
-.gitignore
