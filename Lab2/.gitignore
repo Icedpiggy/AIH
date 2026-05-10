@@ -4,3 +4,7 @@ checkpoint
 checkpoint_*
 report
 NER
+*.pkl
+*.txt
+
+!/task1/data_utils.py
