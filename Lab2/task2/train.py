@@ -1,10 +1,20 @@
 import sys
 import os
+import random
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from task1.data_utils import load_data, build_vocab, CHINESE_TAG2ID, ENGLISH_TAG2ID
 from task2.CRF import CRF
+
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 
 class LinearCRF(nn.Module):

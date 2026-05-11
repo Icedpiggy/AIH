@@ -51,7 +51,7 @@ class CRF(nn.Module):
 	def decode(self, emissions, mask):
 		B, T, N = emissions.shape
 		scores = self.start_tr + emissions[:, 0, :]
-		prev = torch.zeros((T, B, N), dtype=torch.int32)
+		prev = torch.zeros((T, B, N), dtype=torch.int32, device=emissions.device)
 
 		for i in range(1, T):
 			s = scores.unsqueeze(2) + self.tr.unsqueeze(0) + emissions[:, i, :].unsqueeze(1)

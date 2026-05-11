@@ -19,11 +19,11 @@ else:
 	model_path = os.path.join("task2", "crf_english.pt")
 	output_path = os.path.join("task2", "pred_english.txt")
 
-ckpt = torch.load(model_path, weights_only=False)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+ckpt = torch.load(model_path, map_location=device, weights_only=False)
 vocab = ckpt["vocab"]
 tag2id = ckpt["tag2id"]
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = LinearCRF(len(vocab), len(tag2id)).to(device)
 model.load_state_dict(ckpt["model"])
 model.eval()
