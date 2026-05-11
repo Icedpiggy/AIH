@@ -33,9 +33,7 @@ class HMM:
 			prev[0, :] = -1
 			for i in range(1, len(x)):
 				score = V.reshape(-1, 1) + self.A + self.B[:, x[i]].reshape(1, -1)
-				assert score.shape == (self.tag_size, self.tag_size)
-				V = np.max(score, axis=0)
-				prev[i, :] = np.argmax(score, axis=0)
+				V, prev[i, :] = np.max(score, axis=0), np.argmax(score, axis=0)
 			
 			y = []
 			cur = np.argmax(V)

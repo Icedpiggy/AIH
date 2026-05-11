@@ -4,6 +4,7 @@ import pickle
 from task1.data_utils import load_data, build_vocab, CHINESE_TAG2ID, ENGLISH_TAG2ID
 from task1.HMM import HMM
 
+UNK = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 LANG = sys.argv[1] if len(sys.argv) > 1 else "Chinese"
 
 if LANG == "Chinese":
@@ -16,7 +17,7 @@ else:
 	save_path = os.path.join("task1", "hmm_english.pkl")
 
 sentences = load_data(train_path)
-vocab = build_vocab(sentences)
+vocab = build_vocab(sentences, unk_threshold=UNK)
 
 encoded = []
 for tokens, labels in sentences:

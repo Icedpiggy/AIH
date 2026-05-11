@@ -5,6 +5,8 @@ checkpoint_*
 report
 NER
 *.pkl
+*.pt
+*.pth
 *.txt
 
 !/task1/data_utils.py
