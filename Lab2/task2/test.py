@@ -2,7 +2,7 @@ import sys
 import os
 import torch
 from torch.utils.data import DataLoader
-from task1.data_utils import load_data, CHINESE_ID2TAG, ENGLISH_ID2TAG
+from utils.data import load_data, CHINESE_ID2TAG, ENGLISH_ID2TAG
 from task2.model import LinearCRF
 from task2.data import NERDataset, collate_fn
 

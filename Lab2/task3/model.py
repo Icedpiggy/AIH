@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from transformers import BertModel
-from task2.CRF import CRF
+from utils.crf import CRF
 
 class TransformerNER(nn.Module):
 	def __init__(self, bert_name, num_tags, unfreeze_layers=0):

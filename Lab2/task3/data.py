@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from transformers import BertTokenizer
-from task1.data_utils import load_data, CHINESE_TAG2ID, ENGLISH_TAG2ID
+from utils.data import load_data, CHINESE_TAG2ID, ENGLISH_TAG2ID
 
 
 class NERDataset(Dataset):

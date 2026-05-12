@@ -1,7 +1,7 @@
 import sys
 import os
 import pickle
-from task1.data_utils import load_data, build_vocab, CHINESE_TAG2ID, ENGLISH_TAG2ID
+from utils.data import load_data, build_vocab, CHINESE_TAG2ID, ENGLISH_TAG2ID
 from task1.HMM import HMM
 
 UNK = int(sys.argv[2]) if len(sys.argv) > 2 else 1

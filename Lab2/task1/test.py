@@ -1,7 +1,7 @@
 import sys
 import os
 import pickle
-from task1.data_utils import load_data, CHINESE_TAGS, ENGLISH_TAGS, CHINESE_ID2TAG, ENGLISH_ID2TAG
+from utils.data import load_data, CHINESE_TAGS, ENGLISH_TAGS, CHINESE_ID2TAG, ENGLISH_ID2TAG
 from task1.HMM import HMM
 
 LANG = sys.argv[1] if len(sys.argv) > 1 else "Chinese"

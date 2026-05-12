@@ -1,5 +1,5 @@
 import torch.nn as nn
-from task2.CRF import CRF
+from utils.crf import CRF
 
 
 class LinearCRF(nn.Module):

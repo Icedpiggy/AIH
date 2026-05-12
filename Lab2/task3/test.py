@@ -3,7 +3,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer
-from task1.data_utils import load_data, CHINESE_ID2TAG, ENGLISH_ID2TAG
+from utils.data import load_data, CHINESE_ID2TAG, ENGLISH_ID2TAG
 from task3.model import TransformerNER
 from task3.data import NERDataset, collate_fn
 

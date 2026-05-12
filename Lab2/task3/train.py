@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer
-from task1.data_utils import load_data, CHINESE_TAG2ID, ENGLISH_TAG2ID
+from utils.data import load_data, CHINESE_TAG2ID, ENGLISH_TAG2ID
 from task3.model import TransformerNER
 from task3.data import NERDataset, collate_fn
 
@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 	print(f"Device: {device}")
-	best_unfreeze = 2 if LANG == "English" else 0
-	best_lr = 3e-4
+	best_lr = 1e-4
+	best_unfreeze = 2
 	model = TransformerNER(bert_name, len(tag2id), unfreeze_layers=best_unfreeze).to(device)
 
 	trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
