@@ -39,12 +39,14 @@ if __name__ == "__main__":
 
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 	print(f"Device: {device}")
-	model = TransformerNER(bert_name, len(tag2id)).to(device)
+	best_unfreeze = 2 if LANG == "English" else 0
+	best_lr = 3e-4
+	model = TransformerNER(bert_name, len(tag2id), unfreeze_layers=best_unfreeze).to(device)
 
 	trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
 	print(f"Trainable params: {trainable}")
 
-	optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
+	optimizer = torch.optim.AdamW(model.parameters(), lr=best_lr)
 
 	for epoch in range(5):
 		total_loss = 0

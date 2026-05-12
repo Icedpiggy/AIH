@@ -4,11 +4,15 @@ from transformers import BertModel
 from task2.CRF import CRF
 
 class TransformerNER(nn.Module):
-	def __init__(self, bert_name, num_tags):
+	def __init__(self, bert_name, num_tags, unfreeze_layers=0):
 		super().__init__()
 		self.bert = BertModel.from_pretrained(bert_name)
 		for p in self.bert.parameters():
 			p.requires_grad = False
+		if unfreeze_layers > 0:
+			for layer in self.bert.encoder.layer[-unfreeze_layers:]:
+				for p in layer.parameters():
+					p.requires_grad = True
 		self.dropout = nn.Dropout(0.1)
 		self.fc = nn.Linear(self.bert.config.hidden_size, num_tags)
 		self.crf = CRF(num_tags)
