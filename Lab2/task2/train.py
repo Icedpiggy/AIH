@@ -24,17 +24,17 @@ if __name__ == "__main__":
 		tag2id = CHINESE_TAG2ID
 		train_path = os.path.join("NER", "Chinese", "train.txt")
 		save_path = os.path.join("task2", "crf_chinese.pt")
-		# Best params from experiment: hidden_dim=64, unk_threshold=3, lr=3e-3
+		# Best params from experiment: hidden_dim=64, unk_threshold=1, lr=3e-3
 		best_hidden_dim = 64
-		best_unk_threshold = 3
+		best_unk_threshold = 1
 		best_lr = 3e-3
 	else:
 		tag2id = ENGLISH_TAG2ID
 		train_path = os.path.join("NER", "English", "train.txt")
 		save_path = os.path.join("task2", "crf_english.pt")
-		# Best params from experiment: hidden_dim=64, unk_threshold=1, lr=3e-3
-		best_hidden_dim = 64
-		best_unk_threshold = 1
+		# Best params from experiment: hidden_dim=256, unk_threshold=0, lr=3e-3
+		best_hidden_dim = 256
+		best_unk_threshold = 0
 		best_lr = 3e-3
 
 	sentences = load_data(train_path)
