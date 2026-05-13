@@ -15,19 +15,23 @@ class TemplateCRF(nn.Module):
 	def _compute_emissions_and_tr_adj(self, batch_uni_ids, batch_bi_ids, batch_mask):
 		B, T, U = batch_uni_ids.shape
 		_, _, Bf = batch_bi_ids.shape
+		N = self.num_tags
 
-		idx = batch_uni_ids.unsqueeze(-1).expand(-1, -1, -1, self.num_tags)
-		idx = idx.clamp(min=0)
-		uni_w = self.uni_weights[idx]
-		uni_w[batch_uni_ids < 0] = 0.0
-		emissions = uni_w.sum(dim=2)
+		emissions = torch.zeros(B, T, N, device=batch_uni_ids.device)
+		for k in range(U):
+			fids = batch_uni_ids[:, :, k]
+			valid = fids >= 0
+			w = self.uni_weights[fids.clamp(min=0)]
+			w[~valid] = 0.0
+			emissions = emissions + w
 
-		idx_b = batch_bi_ids.unsqueeze(-1).unsqueeze(-1)
-		idx_b = idx_b.expand(-1, -1, -1, self.num_tags, self.num_tags)
-		idx_b = idx_b.clamp(min=0)
-		bi_w = self.bi_weights[idx_b]
-		bi_w[batch_bi_ids < 0] = 0.0
-		tr_adj = bi_w.sum(dim=2)
+		tr_adj = torch.zeros(B, T, N, N, device=batch_bi_ids.device)
+		for k in range(Bf):
+			fids = batch_bi_ids[:, :, k]
+			valid = fids >= 0
+			w = self.bi_weights[fids.clamp(min=0)]
+			w[~valid] = 0.0
+			tr_adj = tr_adj + w
 
 		return emissions, tr_adj
 
