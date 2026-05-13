@@ -64,7 +64,7 @@ class CRF(nn.Module):
 		best_last = scores.argmax(dim=1)
 
 		paths = torch.zeros((B, T), dtype=torch.long, device=emissions.device)
-		paths[:, T - 1] = best_last
+		paths[:, T-1] = best_last
 
 		for i in range(T - 2, -1, -1):
 			best_last = prev[i+1, :, :].gather(1, best_last.unsqueeze(1)).squeeze(1)

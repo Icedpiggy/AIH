@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 	print(f"Device: {device}")
-	best_lr = 1e-4
-	best_unfreeze = 2
+	best_lr = 5e-5
+	best_unfreeze = 7 if LANG == "Chinese" else 8
 	model = TransformerNER(bert_name, len(tag2id), unfreeze_layers=best_unfreeze).to(device)
 
 	trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -62,9 +62,8 @@ if __name__ == "__main__":
 			total_loss += loss.item()
 		print(f"Epoch {epoch + 1}/5  loss={total_loss / len(loader):.4f}")
 
-	trainable_sd = {k: v for k, v in model.state_dict().items() if "bert" not in k}
 	torch.save({
-		"model": trainable_sd,
+		"model": model.state_dict(),
 		"tag2id": tag2id,
 		"lang": LANG,
 		"bert_name": bert_name,
