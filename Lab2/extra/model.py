@@ -58,7 +58,7 @@ class TemplateCRF(nn.Module):
 
 		trans_scores = torch.zeros(B, device=emissions.device)
 		for i in range(T - 1):
-			tr = self.base_tr + tr_adj[:, i, :, :]
+			tr = self.base_tr + tr_adj[:, i+1, :, :]
 			trans_scores += tr[torch.arange(B, device=emissions.device), tags[:, i], tags[:, i+1]] * mask[:, i+1]
 
 		start_scores = self.start_tr[tags[:, 0]]
