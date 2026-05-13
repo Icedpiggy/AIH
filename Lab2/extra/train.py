@@ -38,7 +38,11 @@ def featurize_sentence(sentence, unigrams, bigrams, uni_vocab, bi_vocab):
 
 
 def collate_fn(batch):
-	uni_list, bi_list, tags_list = zip(*batch)
+	has_tokens = len(batch[0]) == 4
+	if has_tokens:
+		uni_list, bi_list, tags_list, tokens_list = zip(*batch)
+	else:
+		uni_list, bi_list, tags_list = zip(*batch)
 	lengths = [x.shape[0] for x in uni_list]
 	max_len = max(lengths)
 	Nu = uni_list[0].shape[1]
@@ -56,6 +60,8 @@ def collate_fn(batch):
 		padded_tags[i, :L] = torch.tensor(tags_list[i], dtype=torch.long)
 		padded_mask[i, :L] = 1.0
 
+	if has_tokens:
+		return padded_uni, padded_bi, padded_tags, padded_mask, tokens_list
 	return padded_uni, padded_bi, padded_tags, padded_mask
 
 
