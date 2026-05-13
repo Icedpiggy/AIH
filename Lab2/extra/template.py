@@ -53,17 +53,23 @@ def extract_features(sentence, unigrams, bigrams, position):
 	return uni_feats, bi_feats
 
 
-def build_feature_vocab(sentences, unigrams, bigrams):
-	uni_vocab = {}
-	bi_vocab = {}
+def build_feature_vocab(sentences, unigrams, bigrams, min_count=1):
+	uni_freq = {}
+	bi_freq = {}
 	for sent in sentences:
 		T = len(sent[0])
 		for pos in range(T):
 			uf, bf = extract_features(sent, unigrams, bigrams, pos)
 			for f in uf:
-				if f not in uni_vocab:
-					uni_vocab[f] = len(uni_vocab)
+				uni_freq[f] = uni_freq.get(f, 0) + 1
 			for f in bf:
-				if f not in bi_vocab:
-					bi_vocab[f] = len(bi_vocab)
+				bi_freq[f] = bi_freq.get(f, 0) + 1
+	uni_vocab = {}
+	bi_vocab = {}
+	for f, c in uni_freq.items():
+		if c >= min_count:
+			uni_vocab[f] = len(uni_vocab)
+	for f, c in bi_freq.items():
+		if c >= min_count:
+			bi_vocab[f] = len(bi_vocab)
 	return uni_vocab, bi_vocab

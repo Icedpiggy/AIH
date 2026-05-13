@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
 	sentences = load_data(train_path)
 	unigrams, bigrams = parse_template(TEMPLATE_PATH)
-	uni_vocab, bi_vocab = build_feature_vocab(sentences, unigrams, bigrams)
+	uni_vocab, bi_vocab = build_feature_vocab(sentences, unigrams, bigrams, min_count=5)
 
 	featurized = [featurize_sentence(s, unigrams, bigrams, uni_vocab, bi_vocab) for s in sentences]
 	dataset = [(u, b, [tag2id[l] for l in s[1]]) for (u, b), s in zip(featurized, sentences)]
@@ -90,9 +90,9 @@ if __name__ == "__main__":
 	print(f"Uni features: {len(uni_vocab)}, Bi features: {len(bi_vocab)}")
 
 	model = TemplateCRF(len(uni_vocab), len(bi_vocab), len(tag2id)).to(device)
-	optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+	optimizer = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=1e-4)
 
-	for epoch in range(30):
+	for epoch in range(50):
 		total_loss = 0
 		for uni_ids, bi_ids, tags, mask in loader:
 			uni_ids = uni_ids.to(device)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 			loss.backward()
 			optimizer.step()
 			total_loss += loss.item()
-		print(f"Epoch {epoch + 1}/30  loss={total_loss / len(loader):.4f}")
+		print(f"Epoch {epoch + 1}/50  loss={total_loss / len(loader):.4f}")
 
 	torch.save({
 		"model": model.state_dict(),
