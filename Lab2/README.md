@@ -37,8 +37,8 @@ Lab2/
 │   ├── data.py           # 数据加载
 │   ├── train.py          # 训练入口
 │   └── test.py           # 预测 + 评测
-├── NER/              # 数据与评测
-└── report.pdf            # 实验报告
+├── NER/              # 数据与 check.py（已删除，如需复现结果需将原数据集放在这里）
+└── report.pdf            # 报告
 ```
 
 ## 快速开始
